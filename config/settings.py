@@ -54,28 +54,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Yerel geliştirme: DB_ENGINE=sqlite (PostgreSQL kurulumu gerekmez)
-# Canlı / üretim: DB_ENGINE=postgresql (varsayılan)
-DB_ENGINE = os.getenv("DB_ENGINE", "postgresql").strip().lower()
-
-if DB_ENGINE in ("sqlite", "sqlite3"):
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / os.getenv("SQLITE_NAME", "db.sqlite3"),
-        }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB", "apts_db"),
+        "USER": os.getenv("POSTGRES_USER", "apts"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "apts123"),
+        "HOST": os.getenv("POSTGRES_HOST", "127.0.0.1"),
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv("POSTGRES_DB", "apts_db"),
-            "USER": os.getenv("POSTGRES_USER", "apts"),
-            "PASSWORD": os.getenv("POSTGRES_PASSWORD", "apts123"),
-            "HOST": os.getenv("POSTGRES_HOST", "127.0.0.1"),
-            "PORT": os.getenv("POSTGRES_PORT", "5432"),
-        }
-    }
+}
 
 
 AUTH_PASSWORD_VALIDATORS = [
