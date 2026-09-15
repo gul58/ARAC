@@ -14,7 +14,7 @@
           <th style="width:50px">#</th>
           <th>Adı Soyadı</th>
           <th>Sorumlu Bölge</th>
-          <th>Türü</th>
+          <th>Durumu</th>
           <th style="width:180px">İşlemler</th>
         </tr>
       </thead>
@@ -72,13 +72,12 @@
           {{ form.region }}
           {% if form.region.errors %}<div class="text-danger small">{{ form.region.errors|striptags }}</div>{% endif %}
         </div>
-        <div class="col-md-1">
-          <div class="form-check mt-4">
-            {{ form.is_yedek }}
-            <label class="form-check-label" for="{{ form.is_yedek.id_for_label }}">Yedek</label>
-          </div>
+        <div class="col-md-2">
+          <label class="form-label">Durumu</label>
+          {{ form.status }}
+          {% if form.status.errors %}<div class="text-danger small">{{ form.status.errors|striptags }}</div>{% endif %}
         </div>
-        <div class="col-md-2 text-end">
+        <div class="col-md-1 text-end">
           <button type="submit" class="btn btn-success">Kaydet</button>
           {% if edit_obj %}<a href="{% url 'ihale_foremen' %}" class="btn btn-outline-secondary btn-sm">İptal</a>{% endif %}
         </div>

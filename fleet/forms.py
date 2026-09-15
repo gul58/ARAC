@@ -89,32 +89,31 @@ class ForemanForm(forms.ModelForm):
             attrs={"class": "form-control", "placeholder": "Formen Adı Soyadı"}
         ),
     )
-    is_yedek = forms.BooleanField(
-        label="Yedek",
-        required=False,
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
-    )
 
     class Meta:
         model = Foreman
-        fields = ["region"]
+        fields = ["region", "status"]
         widgets = {
             "region": forms.Select(attrs={"class": "form-select"}),
+            "status": forms.Select(attrs={"class": "form-select"}),
+        }
+        labels = {
+            "region": "Sorumlu Bölge",
+            "status": "Durumu",
         }
 
     def __init__(self, *args, **kwargs):
         self.instance_obj = kwargs.get("instance")
         super().__init__(*args, **kwargs)
         self.fields["region"].empty_label = "----------"
+        self.fields["status"].choices = StatusChoice.choices
         if self.instance_obj and self.instance_obj.pk:
             self.fields["username"].initial = self.instance_obj.user.username
             self.fields["full_name"].initial = self.instance_obj.full_name
-            self.fields["is_yedek"].initial = (
-                self.instance_obj.status == StatusChoice.YEDEK
-            )
             self.fields["password"].help_text = "Boş bırakırsanız parola değişmez."
         else:
             self.fields["password"].required = True
+            self.fields["status"].initial = StatusChoice.ASIL
 
     def clean_username(self):
         username = self.cleaned_data["username"].strip()
@@ -137,7 +136,7 @@ class ForemanForm(forms.ModelForm):
         parts = full_name.split(None, 1)
         first_name = parts[0]
         last_name = parts[1] if len(parts) > 1 else ""
-        status = StatusChoice.YEDEK if self.cleaned_data.get("is_yedek") else StatusChoice.ASIL
+        status = self.cleaned_data["status"]
         username = self.cleaned_data["username"]
         password = self.cleaned_data.get("password")
 
