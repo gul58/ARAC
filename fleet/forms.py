@@ -268,6 +268,16 @@ class DriverForm(forms.ModelForm):
 
 
 class VehicleTaskForm(forms.ModelForm):
+    READONLY_MODEL_FIELDS = (
+        "assigned_supervisor_name",
+        "assigned_supervisor_title",
+        "dispatching_supervisor_name",
+        "dispatching_supervisor_title",
+        "task_type",
+        "destination",
+        "engine_hours_km",
+    )
+
     departure_local = forms.CharField(
         label="Çıkış",
         required=True,
@@ -307,23 +317,39 @@ class VehicleTaskForm(forms.ModelForm):
             "engine_hours_km",
         ]
         widgets = {
-            "assigned_supervisor_name": forms.TextInput(attrs={"class": "form-control"}),
-            "assigned_supervisor_title": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "..."}
+            "assigned_supervisor_name": forms.TextInput(
+                attrs={"class": "form-control readonly-field", "readonly": True, "tabindex": "-1"}
             ),
-            "dispatching_supervisor_name": forms.TextInput(attrs={"class": "form-control"}),
-            "dispatching_supervisor_title": forms.TextInput(attrs={"class": "form-control"}),
-            "task_type": forms.TextInput(attrs={"class": "form-control"}),
-            "destination": forms.TextInput(attrs={"class": "form-control"}),
+            "assigned_supervisor_title": forms.TextInput(
+                attrs={"class": "form-control readonly-field", "readonly": True, "tabindex": "-1"}
+            ),
+            "dispatching_supervisor_name": forms.TextInput(
+                attrs={"class": "form-control readonly-field", "readonly": True, "tabindex": "-1"}
+            ),
+            "dispatching_supervisor_title": forms.TextInput(
+                attrs={"class": "form-control readonly-field", "readonly": True, "tabindex": "-1"}
+            ),
+            "task_type": forms.TextInput(
+                attrs={"class": "form-control readonly-field", "readonly": True, "tabindex": "-1"}
+            ),
+            "destination": forms.TextInput(
+                attrs={"class": "form-control readonly-field", "readonly": True, "tabindex": "-1"}
+            ),
             "vehicle": forms.Select(attrs={"class": "form-select"}),
             "driver": forms.Select(attrs={"class": "form-select"}),
-            "engine_hours_km": forms.TextInput(attrs={"class": "form-control"}),
+            "engine_hours_km": forms.TextInput(
+                attrs={"class": "form-control readonly-field", "readonly": True, "tabindex": "-1"}
+            ),
         }
 
     def __init__(self, *args, region=None, formen_profile=None, **kwargs):
         self.region = region
         self.formen_profile = formen_profile
         super().__init__(*args, **kwargs)
+        for name in self.READONLY_MODEL_FIELDS:
+            self.fields[name].required = False
+            self.fields[name].disabled = True
+
         vehicles = Vehicle.objects.filter(region=region).select_related("company")
         self.fields["vehicle"].queryset = vehicles
         self.fields["vehicle"].empty_label = None
@@ -342,13 +368,14 @@ class VehicleTaskForm(forms.ModelForm):
             self.fields["departure_local"].initial = self._fmt(self.instance.departure_datetime)
             self.fields["arrival_local"].initial = self._fmt(self.instance.arrival_datetime)
         if not self.is_bound:
-            self.fields["dispatching_supervisor_title"].initial = (
-                self.instance.dispatching_supervisor_title
-                if self.instance and self.instance.pk
-                else "Formen"
-            )
-            if formen_profile and not (self.instance and self.instance.pk):
-                self.fields["dispatching_supervisor_name"].initial = formen_profile.full_name
+            if self.instance and self.instance.pk:
+                self.fields["dispatching_supervisor_title"].initial = (
+                    self.instance.dispatching_supervisor_title or "Formen"
+                )
+            else:
+                self.fields["dispatching_supervisor_title"].initial = "Formen"
+                if formen_profile:
+                    self.fields["dispatching_supervisor_name"].initial = formen_profile.full_name
 
     @staticmethod
     def _fmt(dt):
@@ -396,13 +423,32 @@ class VehicleTaskForm(forms.ModelForm):
         return cleaned
 
     def save(self, commit=True, created_by=None):
-        task = super().save(commit=False)
+        # disabled alanlar POST ile değiştirilemez; yalnızca araç/şoför/tarih güncellenir
+        if self.instance and self.instance.pk:
+            task = VehicleTask.objects.get(pk=self.instance.pk)
+        else:
+            task = VehicleTask(
+                assigned_supervisor_name="",
+                assigned_supervisor_title="",
+                task_type="",
+                destination="",
+                engine_hours_km="",
+                dispatching_supervisor_title="Formen",
+                dispatching_supervisor_name=(
+                    self.formen_profile.full_name if self.formen_profile else ""
+                ),
+            )
+
+        task.vehicle = self.cleaned_data["vehicle"]
+        task.driver = self.cleaned_data["driver"]
         task.departure_datetime = self.cleaned_data["departure_local"]
         task.arrival_datetime = self.cleaned_data["arrival_local"]
         task.company = task.vehicle.company
         task.region = task.vehicle.region
-        if created_by is not None:
+
+        if not task.pk and created_by is not None:
             task.created_by = created_by
+
         if commit:
             task.save()
         return task

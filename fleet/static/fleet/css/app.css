@@ -431,6 +431,7 @@ body {
   background: #e9ecef !important;
   color: #495057;
   font-weight: 600;
+  pointer-events: none;
 }
 
 .company-highlight {
