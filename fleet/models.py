@@ -90,7 +90,7 @@ class Foreman(models.Model):
         ordering = ["first_name", "last_name"]
 
     def __str__(self):
-        return self.full_name
+        return self.display_name
 
     @property
     def full_name(self):
