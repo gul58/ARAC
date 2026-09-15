@@ -3,47 +3,46 @@
 {% block title %}{% block page_title %}APTS Yönetim{% endblock %}{% endblock %}
 
 {% block body %}
-<nav class="navbar navbar-expand-lg ihale-navbar">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'ihale_regions' %}">
-      <i class="bi bi-truck-front-fill"></i> APTS Yönetim
+<nav class="navbar navbar-expand navbar-dark ihale-navbar sticky-top">
+  <div class="container-fluid flex-nowrap">
+    <a class="navbar-brand flex-shrink-0" href="{% url 'ihale_regions' %}">
+      <span class="brand-icon" aria-hidden="true">🚜</span>
+      <span>APTS Yönetim</span>
     </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#ihaleNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="ihaleNav">
-      <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+
+    <div class="navbar-collapse show" id="ihaleNav">
+      <ul class="navbar-nav mx-auto flex-row flex-wrap align-items-center mb-0">
         <li class="nav-item">
           <a class="nav-link {% if active_nav == 'bolgeler' %}active{% endif %}" href="{% url 'ihale_regions' %}">
-            <i class="bi bi-geo-alt-fill text-danger"></i> Bölgeler
+            <span class="nav-emoji" aria-hidden="true">📍</span> Bölgeler
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if active_nav == 'firmalar' %}active{% endif %}" href="{% url 'ihale_companies' %}">
-            <i class="bi bi-building"></i> Firmalar
+            <span class="nav-emoji" aria-hidden="true">🏢</span> Firmalar
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if active_nav == 'formenler' %}active{% endif %}" href="{% url 'ihale_foremen' %}">
-            <i class="bi bi-person-badge"></i> Formenler
+            <span class="nav-emoji" aria-hidden="true">👷</span> Formenler
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if active_nav == 'araclar' %}active{% endif %}" href="{% url 'ihale_vehicles' %}">
-            <i class="bi bi-truck"></i> Araçlar
+            <span class="nav-emoji" aria-hidden="true">🚛</span> Araçlar
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if active_nav == 'soforler' %}active{% endif %}" href="{% url 'ihale_drivers' %}">
-            <i class="bi bi-person-vcard"></i> Şoförler
+            <span class="nav-emoji" aria-hidden="true">👤</span> Şoförler
           </a>
         </li>
       </ul>
-      <div class="user-area">
+      <div class="user-area flex-shrink-0 ms-auto text-nowrap">
         Hoş geldin, <strong>{{ user.username }}</strong>
         <form method="post" action="{% url 'logout' %}" class="d-inline">
           {% csrf_token %}
-          <button type="submit" class="btn btn-link text-white text-decoration-none p-0 ms-2">Çıkış Yap</button>
+          <button type="submit" class="btn btn-link logout-link p-0 ms-2">Çıkış Yap</button>
         </form>
       </div>
     </div>
