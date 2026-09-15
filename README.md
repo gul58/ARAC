@@ -2,7 +2,7 @@
 
 Kocaeli Büyükşehir Belediyesi Yol ve Bakım Dairesi için **Kiralık Araç Görev Emri** sistemi.
 
-Django **5.2 LTS** + **PostgreSQL** + Bootstrap 5 + Django Templates.
+Django **5.2 LTS** + **SQLite** (varsayılan) / isteğe bağlı PostgreSQL + Bootstrap 5.
 
 ## Roller
 
@@ -14,58 +14,50 @@ Django **5.2 LTS** + **PostgreSQL** + Bootstrap 5 + Django Templates.
 
 ## Gereksinimler
 
-- Python 3.12+
-- PostgreSQL 14+
+- Python 3.12+ (3.10+ de olur)
+- Veritabanı: **SQLite** (varsayılan, ekstra kurulum yok)
 
-## Kurulum
+## Kurulum (Windows)
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate   # Windows: .\.venv\Scripts\Activate.ps1
+```powershell
+cd C:\Projeler\ARAC
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-cp .env.example .env        # Windows: copy .env.example .env
-```
-
-PostgreSQL'de veritabanı oluşturun:
-
-```sql
-CREATE USER apts WITH PASSWORD 'apts123' CREATEDB;
-CREATE DATABASE apts_db OWNER apts;
-GRANT ALL ON SCHEMA public TO apts;
-```
-
-```bash
+copy .env.example .env
 python manage.py migrate
 python manage.py seed_data
 python manage.py runserver 8765
 ```
 
+`.env` içinde `DB_ENGINE=sqlite` olsun.
+
 Tarayıcı: http://127.0.0.1:8765/giris/
 
-## Ortam değişkenleri (`.env`)
+## PostgreSQL kullanmak isterseniz
 
-- `DJANGO_SECRET_KEY`
-- `DJANGO_DEBUG`
-- `DJANGO_ALLOWED_HOSTS`
-- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT`
+`.env`:
 
-## Özellikler
+```env
+DB_ENGINE=postgresql
+POSTGRES_DB=apts_db
+POSTGRES_USER=apts
+POSTGRES_PASSWORD=apts123
+POSTGRES_HOST=127.0.0.1
+POSTGRES_PORT=5432
+```
 
-### İhale
-- Bölge / Firma / Formen / Araç / Şoför ekleme, düzenleme, silme
+## Ortam değişkenleri
 
-### Formen
-- Kendi bölgesindeki görev emirleri (kayıt, liste, düzenle, sil)
-- Araç / şoför / çıkış-giriş saatleri
-- Varış > Çıkış kontrolü (frontend + backend)
+- `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`
+- `DJANGO_CSRF_TRUSTED_ORIGINS`
+- `DB_ENGINE` — `sqlite` (varsayılan) veya `postgresql`
+
+## PythonAnywhere
+
+[DEPLOY_PYTHONANYWHERE.md](DEPLOY_PYTHONANYWHERE.md) — ücretsiz hesap + SQLite.
 
 ## Repolar
 
 - Origin: https://cursor.com/codebase/mer-g-lsoy/task-master
 - GitHub: https://github.com/gul58/ARAC
-
-## PythonAnywhere
-
-Kurulum adımları: [DEPLOY_PYTHONANYWHERE.md](DEPLOY_PYTHONANYWHERE.md)
-
-> PostgreSQL için PythonAnywhere **ücretli plan** gerekir.
