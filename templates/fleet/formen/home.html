@@ -1,0 +1,16 @@
+{% extends "fleet/formen/base_formen.html" %}
+
+{% block page_title %}Formen Ana Sayfa{% endblock %}
+
+{% block content %}
+<div class="formen-home-wrap">
+  <h2 class="mb-4">Kiralık Araç Görev Emri</h2>
+  <p class="text-muted mb-4">Bölge: <strong>{{ formen_profile.region.name }}</strong></p>
+  <a href="{% url 'formen_task_create' %}" class="btn btn-primary home-btn">
+    <i class="bi bi-file-earmark-plus me-2"></i> Görev Emri Kayıt
+  </a>
+  <a href="{% url 'formen_task_list' %}" class="btn btn-outline-primary home-btn">
+    <i class="bi bi-list-check me-2"></i> Görev Emri Listeleme
+  </a>
+</div>
+{% endblock %}

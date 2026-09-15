@@ -1,0 +1,53 @@
+{% extends "fleet/formen/base_formen.html" %}
+{% load tz %}
+
+{% block page_title %}Görev Emri Listeleme{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="mgmt-card">
+    <h1 class="h4 mb-3"><i class="bi bi-list-ul me-1"></i> Görev Emri Listeleme</h1>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Tarih</th>
+            <th>Firma</th>
+            <th>Araç</th>
+            <th>Plaka</th>
+            <th>Şoför</th>
+            <th>Çıkış</th>
+            <th>Varış</th>
+            <th style="width:160px">İşlemler</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in tasks %}
+          <tr>
+            <td>{{ t.departure_datetime|localtime|date:"d.m.Y" }}</td>
+            <td>{{ t.company.name }}</td>
+            <td>{{ t.vehicle.vehicle_type }}</td>
+            <td><strong>{{ t.vehicle.plate }}</strong></td>
+            <td>{{ t.driver.full_name }}</td>
+            <td>{{ t.departure_datetime|localtime|date:"H:i" }}</td>
+            <td>{{ t.arrival_datetime|localtime|date:"H:i" }}</td>
+            <td>
+              <a href="{% url 'formen_task_edit' t.id %}" class="btn btn-sm btn-edit">Düzenle</a>
+              <form method="post" action="{% url 'formen_task_delete' t.id %}" class="d-inline"
+                    onsubmit="return confirm('Bu görev emrini silmek istediğinizden emin misiniz?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger">Sil</button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-muted">Kayıtlı görev emri bulunamadı.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

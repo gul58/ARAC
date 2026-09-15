@@ -1,0 +1,105 @@
+{% extends "fleet/ihale/base_ihale.html" %}
+
+{% block page_title %}Araç Yönetimi{% endblock %}
+
+{% block content %}
+<div class="mgmt-card">
+  <h1><i class="bi bi-truck"></i> Araç Yönetimi ve Atamaları</h1>
+
+  <div class="section-title">Kayıtlı Araçlar ve Atamaları</div>
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Plaka</th>
+          <th>Cinsi</th>
+          <th>Durumu</th>
+          <th>Firma</th>
+          <th>Atanan Bölge</th>
+          <th>Asıl Formen</th>
+          <th>Yedek Formen</th>
+          <th style="width:120px">İşlemler</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in vehicles %}
+        <tr>
+          <td><strong>{{ v.plate }}</strong></td>
+          <td>{{ v.vehicle_type }}</td>
+          <td>
+            {% if v.status == 'asil' %}
+              <span class="badge badge-asil">Asıl</span>
+            {% else %}
+              <span class="badge text-bg-secondary">Yedek</span>
+            {% endif %}
+          </td>
+          <td>{{ v.company.name }}</td>
+          <td>{{ v.region.name }}</td>
+          <td>{{ v.primary_foreman.display_name }}</td>
+          <td>{% if v.backup_foreman %}{{ v.backup_foreman.display_name }}{% else %}-{% endif %}</td>
+          <td>
+            <div class="d-grid gap-1">
+              <a href="?edit={{ v.id }}" class="btn btn-sm btn-edit">Düzenle</a>
+              <form method="post" action="{% url 'ihale_vehicle_delete' v.id %}"
+                    onsubmit="return confirm('Bu aracı silmek istediğinizden emin misiniz?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger w-100">Sil</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-muted">Henüz araç kaydı yok.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="add-panel">
+    <div class="section-title">{% if edit_obj %}Araç Düzenle{% else %}+ Yeni Araç Ekle{% endif %}</div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Plaka</label>
+          {{ form.plate }}
+          {% if form.plate.errors %}<div class="text-danger small">{{ form.plate.errors|striptags }}</div>{% endif %}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Cinsi</label>
+          {{ form.vehicle_type }}
+          {% if form.vehicle_type.errors %}<div class="text-danger small">{{ form.vehicle_type.errors|striptags }}</div>{% endif %}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Durumu</label>
+          {{ form.status }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Firma</label>
+          {{ form.company }}
+          {% if form.company.errors %}<div class="text-danger small">{{ form.company.errors|striptags }}</div>{% endif %}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Bölge</label>
+          {{ form.region }}
+          {% if form.region.errors %}<div class="text-danger small">{{ form.region.errors|striptags }}</div>{% endif %}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Asıl Formen</label>
+          {{ form.primary_foreman }}
+          {% if form.primary_foreman.errors %}<div class="text-danger small">{{ form.primary_foreman.errors|striptags }}</div>{% endif %}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Yedek Formen</label>
+          {{ form.backup_foreman }}
+          {% if form.backup_foreman.errors %}<div class="text-danger small">{{ form.backup_foreman.errors|striptags }}</div>{% endif %}
+        </div>
+        <div class="col-12 text-end">
+          <button type="submit" class="btn btn-success px-4">Kaydet</button>
+          {% if edit_obj %}<a href="{% url 'ihale_vehicles' %}" class="btn btn-outline-secondary">İptal</a>{% endif %}
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

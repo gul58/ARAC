@@ -1,0 +1,220 @@
+{% extends "fleet/formen/base_formen.html" %}
+{% load tz %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="task-sheet">
+  <div class="task-sheet-header">
+    <div class="org">
+      KOCAELİ BÜYÜKŞEHİR BELEDİYESİ<br>
+      YOL VE BAKIM DAİRESİ BAŞKANLIĞI
+    </div>
+    <h1 class="title">KİRALIK ARAÇ GÖREV EMRİ</h1>
+    <div class="task-meta">
+      <div class="task-no">No: {{ task_number }}</div>
+      <div class="task-date">
+        <i class="bi bi-calendar3"></i>
+        Tarih:
+        {% now "d.m.Y" %}
+      </div>
+    </div>
+  </div>
+
+  <form method="post" id="taskForm" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <table class="task-table mb-0">
+      <thead>
+        <tr>
+          <th colspan="2">GÖREVLENDİRİLEN BİRİM AMİRİNİN / ARACIN</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label-cell">ADI SOYADI</td>
+          <td>{{ form.assigned_supervisor_name }}</td>
+        </tr>
+        <tr>
+          <td class="label-cell">ÜNVANI</td>
+          <td>{{ form.assigned_supervisor_title }}</td>
+        </tr>
+        <tr>
+          <td class="label-cell">İMZASI</td>
+          <td><input type="text" class="form-control readonly-field" value="Sistem Onaylı" readonly></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="task-table mb-0">
+      <thead>
+        <tr>
+          <th colspan="2">ARACI SEVK EDEN AMİRİN</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label-cell">ADI / SOYADI</td>
+          <td>{{ form.dispatching_supervisor_name }}</td>
+        </tr>
+        <tr>
+          <td class="label-cell">ÜNVANI</td>
+          <td>{{ form.dispatching_supervisor_title }}</td>
+        </tr>
+        <tr>
+          <td class="label-cell">GÖREVİN TÜRÜ</td>
+          <td>
+            {{ form.task_type }}
+            {% if form.task_type.errors %}<div class="text-danger small">{{ form.task_type.errors|striptags }}</div>{% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">GİDECEĞİ YER</td>
+          <td>
+            {{ form.destination }}
+            {% if form.destination.errors %}<div class="text-danger small">{{ form.destination.errors|striptags }}</div>{% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">İMZASI</td>
+          <td><input type="text" class="form-control readonly-field" value="Sistem Onaylı" readonly></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="task-table">
+      <tbody>
+        <tr>
+          <td class="label-cell">AİT OLDUĞU KURULUŞ (FİRMA)</td>
+          <td>
+            <input type="text" id="companyDisplay" class="form-control company-highlight" readonly
+                   value="{% if task %}{{ task.company.name }}{% endif %}">
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">ARACIN PLAKASI VE CİNSİ</td>
+          <td>
+            {{ form.vehicle }}
+            {% if form.vehicle.errors %}<div class="text-danger small">{{ form.vehicle.errors|striptags }}</div>{% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">SÜRÜCÜNÜN ADI/SOYADI</td>
+          <td>
+            {{ form.driver }}
+            {% if form.driver.errors %}<div class="text-danger small">{{ form.driver.errors|striptags }}</div>{% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell">ARACIN MOTOR SAATİ VE KM'Sİ</td>
+          <td>{{ form.engine_hours_km }}</td>
+        </tr>
+        <tr>
+          <td class="label-cell">ARACIN GİRİŞ VE ÇIKIŞ SAATİ</td>
+          <td>
+            <div class="row g-2">
+              <div class="col-md-6">
+                <label class="small fw-bold">ÇIKIŞ</label>
+                {{ form.departure_local }}
+                {% if form.departure_local.errors %}
+                  <div class="text-danger small">{{ form.departure_local.errors|striptags }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="small fw-bold">GİRİŞ</label>
+                {{ form.arrival_local }}
+                {% if form.arrival_local.errors %}
+                  <div class="text-danger small">{{ form.arrival_local.errors|striptags }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="notes-box">
+      <ol class="mb-0 ps-3">
+        <li>Bu görev emri üç nüsha olarak düzenlenir; bir nüsha firmaya, bir nüsha formen dosyasına, bir nüsha ilgili birime verilir.</li>
+        <li>Görev emri, denetim yetkililerine talep halinde ibraz edilir.</li>
+        <li>Sürücü görev süresince trafik kurallarına uyar; araç içinde sigara içilmez, saygılı davranır.</li>
+      </ol>
+    </div>
+
+    <div class="text-center">
+      <button type="submit" class="btn btn-save-task">Görev Emri Kaydet</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const vehicleSelect = document.getElementById("id_vehicle");
+  const driverSelect = document.getElementById("id_driver");
+  const companyDisplay = document.getElementById("companyDisplay");
+  const departureInput = document.getElementById("id_departure_local");
+  const arrivalInput = document.getElementById("id_arrival_local");
+  const form = document.getElementById("taskForm");
+  const driversUrlTpl = "{% url 'formen_vehicle_drivers' 999999 %}".replace("999999", "__ID__");
+  const initialDriverId = "{% if form.driver.value %}{{ form.driver.value }}{% endif %}";
+
+  function parseTRDateTime(value) {
+    const m = value.trim().match(/^(\d{2})\.(\d{2})\.(\d{4})\s+(\d{2}):(\d{2})(?::(\d{2}))?$/);
+    if (!m) return null;
+    const d = new Date(
+      Number(m[3]), Number(m[2]) - 1, Number(m[1]),
+      Number(m[4]), Number(m[5]), Number(m[6] || 0)
+    );
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  async function loadDrivers(vehicleId, preferredDriverId) {
+    if (!vehicleId) return;
+    const res = await fetch(driversUrlTpl.replace("__ID__", vehicleId));
+    if (!res.ok) return;
+    const data = await res.json();
+    companyDisplay.value = data.company || "";
+    driverSelect.innerHTML = "";
+    let selected = preferredDriverId || "";
+    data.drivers.forEach(function (d) {
+      const opt = document.createElement("option");
+      opt.value = d.id;
+      opt.textContent = d.label;
+      if (!selected && d.is_primary) selected = String(d.id);
+      driverSelect.appendChild(opt);
+    });
+    if (selected) driverSelect.value = selected;
+  }
+
+  if (vehicleSelect) {
+    vehicleSelect.addEventListener("change", function () {
+      loadDrivers(this.value, null);
+    });
+    if (vehicleSelect.value) {
+      loadDrivers(vehicleSelect.value, initialDriverId);
+    }
+  }
+
+  if (form) {
+    form.addEventListener("submit", function (e) {
+      const dep = parseTRDateTime(departureInput.value || "");
+      const arr = parseTRDateTime(arrivalInput.value || "");
+      if (!dep || !arr) {
+        e.preventDefault();
+        alert("Çıkış ve varış için geçerli tarih/saat giriniz (örn: 10.09.2026 08:30).");
+        return;
+      }
+      if (arr <= dep) {
+        e.preventDefault();
+        alert("Varış tarihi ve saati, çıkış tarihi ve saatinden sonra olmalıdır.");
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

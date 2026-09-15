@@ -1,0 +1,55 @@
+{% extends "fleet/ihale/base_ihale.html" %}
+
+{% block page_title %}Bölge Yönetimi{% endblock %}
+
+{% block content %}
+<div class="mgmt-card">
+  <h1><i class="bi bi-geo-alt-fill text-danger"></i> Bölge Yönetimi</h1>
+
+  <div class="section-title">Kayıtlı Bölgeler</div>
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle">
+      <thead class="table-light">
+        <tr>
+          <th style="width:60px">#</th>
+          <th>Bölge Adı</th>
+          <th style="width:200px">İşlemler</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in regions %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td><strong>{{ r.name }}</strong></td>
+          <td>
+            <a href="?edit={{ r.id }}" class="btn btn-sm btn-edit">Düzenle</a>
+            <form method="post" action="{% url 'ihale_region_delete' r.id %}" class="d-inline"
+                  onsubmit="return confirm('Bu bölgeyi silmek istediğinizden emin misiniz?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-danger">Sil</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" class="text-muted">Henüz bölge kaydı yok.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="add-panel">
+    <div class="section-title">{% if edit_obj %}Bölge Düzenle{% else %}+ Yeni Bölge Ekle{% endif %}</div>
+    <form method="post" class="row g-2 align-items-end">
+      {% csrf_token %}
+      <div class="col-md-9">
+        {{ form.name }}
+        {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors|striptags }}</div>{% endif %}
+      </div>
+      <div class="col-md-3 text-end">
+        <button type="submit" class="btn btn-success px-4">Kaydet</button>
+        {% if edit_obj %}<a href="{% url 'ihale_regions' %}" class="btn btn-outline-secondary">İptal</a>{% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Giriş Yap — Kiralık Araç Görev Emri Sistemi{% endblock %}
+{% block body_class %}login-page{% endblock %}
+
+{% block body %}
+<div class="login-card">
+  <aside class="login-side">
+    <i class="bi bi-truck truck-icon"></i>
+    <h1>KOCAELİ BÜYÜKŞEHİR BELEDİYESİ</h1>
+    <div class="subtitle">Yol ve Bakım Dairesi Başkanlığı</div>
+    <hr>
+    <div class="system-name">Kiralık Araç Görev Emri Sistemi</div>
+    <div class="login-info-box">
+      <i class="bi bi-info-circle me-1"></i>
+      Sisteme yetkili kullanıcı adınız ve parolanız ile giriş yapabilirsiniz.
+      Görev emri oluşturma ve araç takip işlemlerinizi sol menüden yönetebilirsiniz.
+    </div>
+  </aside>
+  <div class="login-form-pane">
+    <h2>Giriş Yap</h2>
+    <p class="lead-text">Lütfen hesabınıza erişmek için bilgilerinizi girin.</p>
+
+    {% if form.errors %}
+      <div class="alert alert-danger py-2">Kullanıcı adı veya parola hatalı.</div>
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label text-secondary small">{{ form.username.label }}</label>
+        <div class="input-icon-wrap">
+          <i class="bi bi-person"></i>
+          {{ form.username }}
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="form-label text-secondary small">{{ form.password.label }}</label>
+        <div class="input-icon-wrap">
+          <i class="bi bi-lock"></i>
+          {{ form.password }}
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-login w-100">
+        <i class="bi bi-box-arrow-in-right me-1"></i> Sisteme Giriş Yap
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
