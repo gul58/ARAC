@@ -63,3 +63,9 @@ Tarayıcı: http://127.0.0.1:8765/giris/
 
 - Origin: https://cursor.com/codebase/mer-g-lsoy/task-master
 - GitHub: https://github.com/gul58/ARAC
+
+## PythonAnywhere
+
+Kurulum adımları: [DEPLOY_PYTHONANYWHERE.md](DEPLOY_PYTHONANYWHERE.md)
+
+> PostgreSQL için PythonAnywhere **ücretli plan** gerekir.
