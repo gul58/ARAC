@@ -15,18 +15,47 @@ Django **5.2 LTS** + **PostgreSQL** + Bootstrap 5 + Django Templates.
 ## Gereksinimler
 
 - Python 3.12+
-- PostgreSQL 14+
+- Veritabanı:
+  - **Yerel (kolay):** SQLite — ekstra kurulum yok (`DB_ENGINE=sqlite`)
+  - **Canlı / üretim:** PostgreSQL 14+
 
-## Kurulum
+## Kurulum (Windows — PostgreSQL olmadan)
+
+1. https://github.com/gul58/ARAC adresinden **Code → Download ZIP** ile indirip açın.
+2. PowerShell'de proje klasörüne girin:
+
+```powershell
+cd C:\Projeler\ARAC
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+copy .env.example .env
+```
+
+`.env` içinde şunun olduğundan emin olun:
+
+```env
+DB_ENGINE=sqlite
+```
+
+```powershell
+python manage.py migrate
+python manage.py seed_data
+python manage.py runserver 8765
+```
+
+Tarayıcı: http://127.0.0.1:8765/giris/
+
+## Kurulum (PostgreSQL ile)
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # veya mevcut .env dosyasını düzenleyin
+cp .env.example .env
 ```
 
-PostgreSQL'de veritabanı oluşturun:
+`.env` içinde `DB_ENGINE=postgresql` yapın. PostgreSQL'de:
 
 ```sql
 CREATE USER apts WITH PASSWORD 'apts123' CREATEDB;
@@ -34,22 +63,19 @@ CREATE DATABASE apts_db OWNER apts;
 GRANT ALL ON SCHEMA public TO apts;
 ```
 
-Migrasyon ve örnek veri:
-
 ```bash
 python manage.py migrate
 python manage.py seed_data
 python manage.py runserver 0.0.0.0:8765
 ```
 
-Tarayıcıda: [http://127.0.0.1:8765/giris/](http://127.0.0.1:8765/giris/)
-
 ## Ortam değişkenleri (`.env`)
 
 - `DJANGO_SECRET_KEY`
 - `DJANGO_DEBUG`
 - `DJANGO_ALLOWED_HOSTS`
-- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT`
+- `DB_ENGINE` — `sqlite` veya `postgresql`
+- `POSTGRES_*` — yalnızca PostgreSQL kullanılırken
 
 ## Özellikler
 
