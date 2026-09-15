@@ -273,9 +273,10 @@ class VehicleTaskForm(forms.ModelForm):
         required=True,
         widget=forms.TextInput(
             attrs={
-                "class": "form-control datetime-input",
-                "placeholder": "gg.aa.yyyy --:--",
+                "class": "form-control datetime-picker",
+                "placeholder": "gg.aa.yyyy ss:dd",
                 "autocomplete": "off",
+                "inputmode": "none",
             }
         ),
     )
@@ -284,9 +285,10 @@ class VehicleTaskForm(forms.ModelForm):
         required=True,
         widget=forms.TextInput(
             attrs={
-                "class": "form-control datetime-input",
-                "placeholder": "gg.aa.yyyy --:--",
+                "class": "form-control datetime-picker",
+                "placeholder": "gg.aa.yyyy ss:dd",
                 "autocomplete": "off",
+                "inputmode": "none",
             }
         ),
     )
