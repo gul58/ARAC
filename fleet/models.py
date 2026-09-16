@@ -427,9 +427,9 @@ class VehicleTask(models.Model):
                     }
                 )
         if self.start_km is not None and self.end_km is not None:
-            if self.end_km < self.start_km:
+            if self.end_km <= self.start_km:
                 raise ValidationError(
-                    {"end_km": "Son KM, İlk KM değerinden küçük olamaz."}
+                    {"end_km": "Son KM, İlk KM değerinden büyük olmalıdır."}
                 )
         if self.vehicle_id and self.driver_id:
             if self.driver.assigned_vehicle_id != self.vehicle_id:

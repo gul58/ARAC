@@ -432,8 +432,8 @@ class VehicleTaskForm(forms.ModelForm):
 
         start_km = cleaned.get("start_km")
         end_km = cleaned.get("end_km")
-        if start_km is not None and end_km is not None and end_km < start_km:
-            self.add_error("end_km", "Son KM, İlk KM değerinden küçük olamaz.")
+        if start_km is not None and end_km is not None and end_km <= start_km:
+            self.add_error("end_km", "Son KM, İlk KM değerinden büyük olmalıdır.")
 
         return cleaned
 
