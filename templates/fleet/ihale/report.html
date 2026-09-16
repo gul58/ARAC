@@ -1,0 +1,117 @@
+{% extends "fleet/ihale/base_ihale.html" %}
+{% load tz %}
+
+{% block page_title %}Görev Emri Raporu{% endblock %}
+
+{% block content %}
+<div class="mgmt-card mt-3">
+  <h1 class="h4 mb-3"><i class="bi bi-file-earmark-bar-graph me-1"></i> Görev Emri Raporu</h1>
+  <p class="text-muted small mb-3">İki tarih arasında bölge, firma, formen ve şoföre göre listeleyin.</p>
+
+  <form method="get" class="row g-2 align-items-end mb-3 filter-panel">
+    <div class="col-6 col-md-2">
+      <label class="form-label small mb-1">İlk Tarih</label>
+      <input type="date" name="start_date" class="form-control form-control-sm" value="{{ start_date }}" required>
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label small mb-1">Son Tarih</label>
+      <input type="date" name="end_date" class="form-control form-control-sm" value="{{ end_date }}" required>
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label small mb-1">Bölge</label>
+      <select name="region" class="form-select form-select-sm">
+        <option value="">Tümü</option>
+        {% for r in regions %}
+        <option value="{{ r.id }}" {% if selected_region == r.id|stringformat:"s" %}selected{% endif %}>{{ r.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label small mb-1">Firma</label>
+      <select name="company" class="form-select form-select-sm">
+        <option value="">Tümü</option>
+        {% for c in companies %}
+        <option value="{{ c.id }}" {% if selected_company == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label small mb-1">Formen</label>
+      <select name="foreman" class="form-select form-select-sm">
+        <option value="">Tümü</option>
+        {% for f in foremen %}
+        <option value="{{ f.id }}" {% if selected_foreman == f.id|stringformat:"s" %}selected{% endif %}>{{ f.display_name }} ({{ f.region.name }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <label class="form-label small mb-1">Şoför</label>
+      <select name="driver" class="form-select form-select-sm">
+        <option value="">Tümü</option>
+        {% for d in drivers %}
+        <option value="{{ d.id }}" {% if selected_driver == d.id|stringformat:"s" %}selected{% endif %}>{{ d.full_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 d-flex gap-2 justify-content-end">
+      <button type="submit" class="btn btn-primary btn-sm px-4">Listele</button>
+      <a href="{% url 'ihale_report' %}" class="btn btn-outline-secondary btn-sm">Temizle</a>
+    </div>
+  </form>
+
+  {% if error %}
+  <div class="alert alert-danger py-2">{{ error }}</div>
+  {% endif %}
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <div class="section-title mb-0">Sonuçlar <span class="badge text-bg-secondary">{{ tasks|length }}</span></div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle table-sm">
+      <thead class="table-light">
+        <tr>
+          <th>Bölge</th>
+          <th>Tarih</th>
+          <th>Firma</th>
+          <th>Plaka</th>
+          <th>Araç</th>
+          <th>Şoför</th>
+          <th>Formen</th>
+          <th>Çıkış</th>
+          <th>Giriş</th>
+          <th>Süre</th>
+          <th>İlk_km</th>
+          <th>Son_km</th>
+          <th>Yol</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in tasks %}
+        <tr>
+          <td>{{ t.region.name }}</td>
+          <td>{{ t.departure_datetime|localtime|date:"d.m.Y" }}</td>
+          <td>{{ t.company.name }}</td>
+          <td><strong>{{ t.vehicle.plate }}</strong></td>
+          <td>{{ t.vehicle.vehicle_type }}</td>
+          <td>{{ t.driver.full_name }}</td>
+          <td>{% if t.created_by.formen_profile %}{{ t.created_by.formen_profile.full_name }}{% elif t.created_by %}{{ t.created_by.username }}{% else %}—{% endif %}</td>
+          <td>{{ t.departure_datetime|localtime|date:"H:i" }}</td>
+          <td>{{ t.arrival_datetime|localtime|date:"H:i" }}</td>
+          <td>{{ t.duration_display }}</td>
+          <td>{% if t.start_km is not None %}{{ t.start_km }}{% else %}—{% endif %}</td>
+          <td>{% if t.end_km is not None %}{{ t.end_km }}{% else %}—{% endif %}</td>
+          <td>{{ t.distance_display }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="13" class="text-muted">
+            {% if searched %}Seçilen kriterlere uygun kayıt bulunamadı.{% else %}Listelemek için tarih aralığı seçip Listele’ye basın.{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

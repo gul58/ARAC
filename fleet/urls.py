@@ -17,6 +17,7 @@ urlpatterns = [
     path("ihale/araclar/<int:pk>/sil/", views.ihale_vehicle_delete, name="ihale_vehicle_delete"),
     path("ihale/soforler/", views.ihale_drivers, name="ihale_drivers"),
     path("ihale/soforler/<int:pk>/sil/", views.ihale_driver_delete, name="ihale_driver_delete"),
+    path("ihale/rapor/", views.ihale_report, name="ihale_report"),
     # Formen
     path("formen/", views.formen_home, name="formen_home"),
     path("formen/gorev-emri/yeni/", views.formen_task_create, name="formen_task_create"),

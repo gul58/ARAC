@@ -263,6 +263,81 @@ def ihale_driver_delete(request, pk):
     return redirect("ihale_drivers")
 
 
+@ihale_required
+def ihale_report(request):
+    """İhale: tarih aralığı + bölge/firma/formen/şoför filtreli görev emri listesi."""
+    today = timezone.localdate()
+    start_raw = request.GET.get("start_date") or today.replace(day=1).isoformat()
+    end_raw = request.GET.get("end_date") or today.isoformat()
+    selected_region = request.GET.get("region", "")
+    selected_company = request.GET.get("company", "")
+    selected_foreman = request.GET.get("foreman", "")
+    selected_driver = request.GET.get("driver", "")
+    searched = "start_date" in request.GET or "end_date" in request.GET
+    error = ""
+    tasks = []
+
+    if searched:
+        try:
+            start = datetime.strptime(start_raw, "%Y-%m-%d").date()
+            end = datetime.strptime(end_raw, "%Y-%m-%d").date()
+            if end < start:
+                raise ValueError("Son tarih, ilk tarihten önce olamaz.")
+            start_dt = timezone.make_aware(datetime.combine(start, time.min))
+            end_dt = timezone.make_aware(datetime.combine(end, time.max))
+            qs = (
+                VehicleTask.objects.filter(
+                    departure_datetime__gte=start_dt,
+                    departure_datetime__lte=end_dt,
+                )
+                .select_related(
+                    "region",
+                    "company",
+                    "vehicle",
+                    "driver",
+                    "created_by",
+                    "created_by__formen_profile",
+                )
+                .order_by("region__name", "departure_datetime", "id")
+            )
+            if selected_region:
+                qs = qs.filter(region_id=selected_region)
+            if selected_company:
+                qs = qs.filter(company_id=selected_company)
+            if selected_foreman:
+                foreman = Foreman.objects.filter(pk=selected_foreman).first()
+                if foreman:
+                    qs = qs.filter(created_by_id=foreman.user_id)
+                else:
+                    qs = qs.none()
+            if selected_driver:
+                qs = qs.filter(driver_id=selected_driver)
+            tasks = list(qs)
+        except ValueError as exc:
+            error = str(exc)
+
+    return render(
+        request,
+        "fleet/ihale/report.html",
+        {
+            "active_nav": "rapor",
+            "regions": Region.objects.all(),
+            "companies": Company.objects.all(),
+            "foremen": Foreman.objects.select_related("region", "user").all(),
+            "drivers": Driver.objects.all(),
+            "start_date": start_raw,
+            "end_date": end_raw,
+            "selected_region": selected_region,
+            "selected_company": selected_company,
+            "selected_foreman": selected_foreman,
+            "selected_driver": selected_driver,
+            "tasks": tasks,
+            "searched": searched,
+            "error": error,
+        },
+    )
+
+
 # ---------- Formen ----------
 
 

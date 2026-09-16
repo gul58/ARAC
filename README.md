@@ -8,9 +8,9 @@ Django **5.2 LTS** + **SQLite** (varsayılan) / isteğe bağlı PostgreSQL + Boo
 
 | Rol | Kullanıcı (örnek) | Parola | Yetki |
 |-----|-------------------|--------|--------|
-| İhale | `cagla` | `cagla123` | Bölge, firma, formen, araç, şoför yönetimi |
-| Formen | `muhammet` | `formen123` | Kendi bölgesindeki görev emirleri (CRUD) |
-| Formen | `m.yanik` | `formen123` | Kendi bölgesindeki görev emirleri (CRUD) |
+| İhale | `cagla` | `cagla123` | Bölge, firma, formen, araç, şoför yönetimi + görev emri raporu (tarih/bölge/firma/formen/şoför) |
+| Formen | `muhammet` | `formen123` | Kendi bölgesindeki görev emirleri (CRUD) + PDF rapor |
+| Formen | `m.yanik` | `formen123` | Kendi bölgesindeki görev emirleri (CRUD) + PDF rapor |
 
 ## Gereksinimler
 
