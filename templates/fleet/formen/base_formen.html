@@ -7,11 +7,15 @@
   <div class="d-flex gap-2 flex-wrap">
     <a href="{% url 'formen_task_create' %}"
        class="btn btn-nav {% if active_nav == 'kaydet' %}active{% endif %}">
-      <i class="bi bi-file-earmark-text me-1"></i> Görev Emri Kaydet
+      <i class="bi bi-file-earmark-text me-1"></i> Görev Emri Kaydetme
     </a>
     <a href="{% url 'formen_task_list' %}"
        class="btn btn-nav {% if active_nav == 'liste' %}active{% endif %}">
       <i class="bi bi-list-ul me-1"></i> Görev Emri Listeleme
+    </a>
+    <a href="{% url 'formen_report' %}"
+       class="btn btn-nav {% if active_nav == 'rapor' %}active{% endif %}">
+      <i class="bi bi-filetype-pdf me-1"></i> Rapor
     </a>
   </div>
   <div class="d-flex align-items-center gap-3">

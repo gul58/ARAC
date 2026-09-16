@@ -1,0 +1,75 @@
+{% extends "fleet/formen/base_formen.html" %}
+
+{% block page_title %}Görev Emri Raporu{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="mgmt-card" style="max-width:640px;margin:0 auto;">
+    <h1 class="h4 mb-2"><i class="bi bi-filetype-pdf text-danger me-1"></i> Rapor (PDF)</h1>
+    <p class="text-muted mb-3">
+      Hakediş için görev emri formlarını seçilen tarih aralığında PDF olarak indirin.
+      Bölge: <strong>{{ profile.region.name }}</strong>
+    </p>
+
+    <form method="post" class="row g-3">
+      {% csrf_token %}
+      <div class="col-md-6">
+        <label class="form-label" for="id_start_date">İlk Tarih</label>
+        <input type="date" name="start_date" id="id_start_date" class="form-control"
+               value="{{ start_date }}" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="id_end_date">Son Tarih</label>
+        <input type="date" name="end_date" id="id_end_date" class="form-control"
+               value="{{ end_date }}" required>
+      </div>
+      {% if error %}
+      <div class="col-12">
+        <div class="alert alert-danger py-2 mb-0">{{ error }}</div>
+      </div>
+      {% endif %}
+      <div class="col-12 d-flex gap-2 justify-content-end">
+        <button type="submit" name="preview" value="1" class="btn btn-outline-secondary">
+          Önizle ({{ task_count|default:"0" }} kayıt)
+        </button>
+        <button type="submit" name="export" value="1" class="btn btn-danger">
+          <i class="bi bi-download me-1"></i> PDF İndir
+        </button>
+      </div>
+    </form>
+
+    {% if preview_tasks is not None %}
+    <hr>
+    <div class="section-title">Seçilen aralıktaki görev emirleri ({{ preview_tasks|length }})</div>
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>No</th>
+            <th>Tarih</th>
+            <th>Plaka</th>
+            <th>Şoför</th>
+            <th>Çıkış</th>
+            <th>Giriş</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in preview_tasks %}
+          <tr>
+            <td>{{ t.display_number }}</td>
+            <td>{{ t.departure_datetime|date:"d.m.Y" }}</td>
+            <td>{{ t.vehicle.plate }}</td>
+            <td>{{ t.driver.full_name }}</td>
+            <td>{{ t.departure_datetime|date:"H:i" }}</td>
+            <td>{{ t.arrival_datetime|date:"H:i" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-muted">Kayıt yok.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

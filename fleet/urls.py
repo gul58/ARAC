@@ -23,6 +23,7 @@ urlpatterns = [
     path("formen/gorev-emri/", views.formen_task_list, name="formen_task_list"),
     path("formen/gorev-emri/<int:pk>/duzenle/", views.formen_task_edit, name="formen_task_edit"),
     path("formen/gorev-emri/<int:pk>/sil/", views.formen_task_delete, name="formen_task_delete"),
+    path("formen/rapor/", views.formen_report, name="formen_report"),
     path(
         "formen/api/arac/<int:vehicle_id>/soforler/",
         views.formen_vehicle_drivers,

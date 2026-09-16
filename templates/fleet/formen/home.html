@@ -7,10 +7,13 @@
   <h2 class="mb-4">Kiralık Araç Görev Emri</h2>
   <p class="text-muted mb-4">Bölge: <strong>{{ formen_profile.region.name }}</strong></p>
   <a href="{% url 'formen_task_create' %}" class="btn btn-primary home-btn">
-    <i class="bi bi-file-earmark-plus me-2"></i> Görev Emri Kayıt
+    <i class="bi bi-file-earmark-plus me-2"></i> Görev Emri Kaydetme
   </a>
   <a href="{% url 'formen_task_list' %}" class="btn btn-outline-primary home-btn">
     <i class="bi bi-list-check me-2"></i> Görev Emri Listeleme
+  </a>
+  <a href="{% url 'formen_report' %}" class="btn btn-outline-danger home-btn">
+    <i class="bi bi-filetype-pdf me-2"></i> Rapor (PDF)
   </a>
 </div>
 {% endblock %}

@@ -1,9 +1,12 @@
+from datetime import datetime, time
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http import Http404, JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
 from .decorators import formen_required, get_formen_or_403, ihale_required
@@ -360,6 +363,75 @@ def formen_task_delete(request, pk):
     task.delete()
     messages.success(request, "Görev emri silindi.")
     return redirect("formen_task_list")
+
+
+@formen_required
+def formen_report(request):
+    """Tarih aralığına göre görev emri formlarını PDF olarak dışa aktarır."""
+    profile = get_formen_or_403(request.user)
+    today = timezone.localdate()
+    start_date = request.POST.get("start_date") or request.GET.get("start_date") or today.replace(day=1).isoformat()
+    end_date = request.POST.get("end_date") or request.GET.get("end_date") or today.isoformat()
+    error = ""
+    preview_tasks = None
+    tasks = VehicleTask.objects.none()
+
+    def parse_dates():
+        try:
+            start = datetime.strptime(start_date, "%Y-%m-%d").date()
+            end = datetime.strptime(end_date, "%Y-%m-%d").date()
+        except (TypeError, ValueError):
+            raise ValueError("Geçerli ilk ve son tarih seçiniz.")
+        if end < start:
+            raise ValueError("Son tarih, ilk tarihten önce olamaz.")
+        return start, end
+
+    def queryset_for(start, end):
+        start_dt = timezone.make_aware(datetime.combine(start, time.min))
+        end_dt = timezone.make_aware(datetime.combine(end, time.max))
+        return (
+            VehicleTask.objects.filter(
+                region_id=profile.region_id,
+                departure_datetime__gte=start_dt,
+                departure_datetime__lte=end_dt,
+            )
+            .select_related("company", "vehicle", "driver", "region")
+            .order_by("departure_datetime", "id")
+        )
+
+    if request.method == "POST":
+        try:
+            start, end = parse_dates()
+            tasks = queryset_for(start, end)
+            if request.POST.get("export"):
+                if not tasks.exists():
+                    error = "Seçilen tarih aralığında görev emri bulunamadı."
+                else:
+                    from .pdf import build_tasks_pdf
+
+                    pdf_buffer = build_tasks_pdf(tasks, region_name=profile.region.name)
+                    filename = f"gorev-emri-{start.isoformat()}_{end.isoformat()}.pdf"
+                    response = HttpResponse(pdf_buffer.getvalue(), content_type="application/pdf")
+                    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+                    return response
+            # preview
+            preview_tasks = list(tasks)
+        except ValueError as exc:
+            error = str(exc)
+
+    return render(
+        request,
+        "fleet/formen/report.html",
+        {
+            "profile": profile,
+            "active_nav": "rapor",
+            "start_date": start_date,
+            "end_date": end_date,
+            "error": error,
+            "preview_tasks": preview_tasks,
+            "task_count": len(preview_tasks) if preview_tasks is not None else 0,
+        },
+    )
 
 
 @formen_required
