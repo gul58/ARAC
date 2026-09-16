@@ -41,24 +41,16 @@ class User(AbstractUser):
 class Region(models.Model):
     # Görev emri numarası için bölge kodları
     CODE_MAP = {
-        "DERİNCE": "DRN",
         "DERINCE": "DRN",
-        "BAŞİSKELE": "BSS",
         "BASISKELE": "BSS",
-        "GÖLCÜK": "GLC",
         "GOLCUK": "GLC",
         "KARTEPE": "KRT",
-        "KÖRFEZ": "KRF",
         "KORFEZ": "KRF",
-        "KARAMÜRSEL": "KRM",
         "KARAMURSEL": "KRM",
         "KANDIRA": "KND",
-        "İZMİT": "ZMT",
         "IZMIT": "ZMT",
-        "DİLOVASI": "DLV",
         "DILOVASI": "DLV",
         "GEBZE": "GBZ",
-        "ÇAYIROVA": "CYR",
         "CAYIROVA": "CYR",
         "DARICA": "DRC",
     }
@@ -95,21 +87,45 @@ class Region(models.Model):
     def __str__(self):
         return self.name
 
+    @staticmethod
+    def normalize_name(name: str) -> str:
+        """Türkçe karakterleri sadeleştirip büyük harfe çevirir."""
+        table = str.maketrans(
+            {
+                "ç": "c",
+                "Ç": "C",
+                "ğ": "g",
+                "Ğ": "G",
+                "ı": "i",
+                "İ": "I",
+                "ö": "o",
+                "Ö": "O",
+                "ş": "s",
+                "Ş": "S",
+                "ü": "u",
+                "Ü": "U",
+            }
+        )
+        return (name or "").translate(table).upper().strip()
+
+    @classmethod
+    def code_for_name(cls, name: str) -> str:
+        return cls.CODE_MAP.get(cls.normalize_name(name), "")
+
     def save(self, *args, **kwargs):
-        if not self.code:
-            key = self.name.strip().upper()
-            self.code = self.CODE_MAP.get(key, "")
+        if not (self.code or "").strip():
+            self.code = self.code_for_name(self.name)
+        else:
+            self.code = self.code.strip().upper()
         super().save(*args, **kwargs)
 
     @classmethod
     def format_task_number(cls, region, sequence):
-        code = ""
+        code = "???"
         if region is not None:
             code = (region.code or "").strip().upper()
             if not code:
-                code = cls.CODE_MAP.get(region.name.strip().upper(), "???")
-        else:
-            code = "???"
+                code = cls.code_for_name(region.name) or "???"
         return f"{code} - {int(sequence):08d}"
 
 
