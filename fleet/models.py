@@ -39,7 +39,53 @@ class User(AbstractUser):
 
 
 class Region(models.Model):
+    # Görev emri numarası için bölge kodları
+    CODE_MAP = {
+        "DERİNCE": "DRN",
+        "DERINCE": "DRN",
+        "BAŞİSKELE": "BSS",
+        "BASISKELE": "BSS",
+        "GÖLCÜK": "GLC",
+        "GOLCUK": "GLC",
+        "KARTEPE": "KRT",
+        "KÖRFEZ": "KRF",
+        "KORFEZ": "KRF",
+        "KARAMÜRSEL": "KRM",
+        "KARAMURSEL": "KRM",
+        "KANDIRA": "KND",
+        "İZMİT": "ZMT",
+        "IZMIT": "ZMT",
+        "DİLOVASI": "DLV",
+        "DILOVASI": "DLV",
+        "GEBZE": "GBZ",
+        "ÇAYIROVA": "CYR",
+        "CAYIROVA": "CYR",
+        "DARICA": "DRC",
+    }
+
+    STANDARD_REGIONS = (
+        ("Derince", "DRN"),
+        ("Başiskele", "BSS"),
+        ("Gölcük", "GLC"),
+        ("Kartepe", "KRT"),
+        ("Körfez", "KRF"),
+        ("Karamürsel", "KRM"),
+        ("Kandıra", "KND"),
+        ("İzmit", "ZMT"),
+        ("Dilovası", "DLV"),
+        ("Gebze", "GBZ"),
+        ("Çayırova", "CYR"),
+        ("Darıca", "DRC"),
+    )
+
     name = models.CharField(max_length=100, unique=True, verbose_name="Bölge Adı")
+    code = models.CharField(
+        max_length=10,
+        blank=True,
+        default="",
+        verbose_name="Kod",
+        help_text="Görev emri numarası için kısaltma (örn: DRN)",
+    )
 
     class Meta:
         verbose_name = "Bölge"
@@ -48,6 +94,23 @@ class Region(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            key = self.name.strip().upper()
+            self.code = self.CODE_MAP.get(key, "")
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def format_task_number(cls, region, sequence):
+        code = ""
+        if region is not None:
+            code = (region.code or "").strip().upper()
+            if not code:
+                code = cls.CODE_MAP.get(region.name.strip().upper(), "???")
+        else:
+            code = "???"
+        return f"{code} - {int(sequence):08d}"
 
 
 class Company(models.Model):
@@ -259,7 +322,9 @@ class VehicleTask(models.Model):
 
     @property
     def display_number(self):
-        return 1000 + self.pk if self.pk else "—"
+        if not self.pk:
+            return "—"
+        return Region.format_task_number(self.region, self.pk)
 
     def clean(self):
         if self.departure_datetime and self.arrival_datetime:

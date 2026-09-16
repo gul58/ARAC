@@ -298,7 +298,8 @@ def formen_task_create(request):
             messages.success(request, "Görev emri başarıyla kaydedildi.")
             return redirect("formen_task_list")
     last = VehicleTask.objects.order_by("-id").first()
-    next_number = 1000 + (last.id if last else 0) + 1
+    next_seq = (last.id if last else 0) + 1
+    next_number = Region.format_task_number(profile.region, next_seq)
     return render(
         request,
         "fleet/formen/task_form.html",

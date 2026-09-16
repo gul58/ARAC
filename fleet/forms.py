@@ -44,14 +44,21 @@ class LoginForm(AuthenticationForm):
 class RegionForm(forms.ModelForm):
     class Meta:
         model = Region
-        fields = ["name"]
+        fields = ["name", "code"]
         widgets = {
             "name": forms.TextInput(
                 attrs={
                     "class": "form-control",
                     "placeholder": "Bölge Adı giriniz...",
                 }
-            )
+            ),
+            "code": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Kod (örn: DRN)",
+                    "maxlength": "10",
+                }
+            ),
         }
 
 
@@ -275,7 +282,6 @@ class VehicleTaskForm(forms.ModelForm):
         "dispatching_supervisor_title",
         "task_type",
         "destination",
-        "engine_hours_km",
     )
 
     departure_local = forms.CharField(
@@ -338,7 +344,7 @@ class VehicleTaskForm(forms.ModelForm):
             "vehicle": forms.Select(attrs={"class": "form-select"}),
             "driver": forms.Select(attrs={"class": "form-select"}),
             "engine_hours_km": forms.TextInput(
-                attrs={"class": "form-control readonly-field", "readonly": True, "tabindex": "-1"}
+                attrs={"class": "form-control", "placeholder": "Motor saati / KM"}
             ),
         }
 
@@ -423,7 +429,7 @@ class VehicleTaskForm(forms.ModelForm):
         return cleaned
 
     def save(self, commit=True, created_by=None):
-        # disabled alanlar POST ile değiştirilemez; yalnızca araç/şoför/tarih güncellenir
+        # disabled alanlar POST ile değiştirilemez; düzenlenebilir alanlar uygulanır
         if self.instance and self.instance.pk:
             task = VehicleTask.objects.get(pk=self.instance.pk)
         else:
@@ -441,6 +447,7 @@ class VehicleTaskForm(forms.ModelForm):
 
         task.vehicle = self.cleaned_data["vehicle"]
         task.driver = self.cleaned_data["driver"]
+        task.engine_hours_km = self.cleaned_data.get("engine_hours_km") or ""
         task.departure_datetime = self.cleaned_data["departure_local"]
         task.arrival_datetime = self.cleaned_data["arrival_local"]
         task.company = task.vehicle.company

@@ -22,8 +22,8 @@ User = get_user_model()
 
 class AuthorizationAndTaskTests(TestCase):
     def setUp(self):
-        self.region_a = Region.objects.create(name="Derince")
-        self.region_b = Region.objects.create(name="Kartepe")
+        self.region_a = Region.objects.create(name="Derince", code="DRN")
+        self.region_b = Region.objects.create(name="Kartepe", code="KRT")
         self.company = Company.objects.create(name="KÜRE")
 
         self.ihale = User.objects.create_user(

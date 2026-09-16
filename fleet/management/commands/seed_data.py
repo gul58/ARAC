@@ -35,8 +35,12 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("İhale kullanıcısı: cagla / cagla123"))
 
         regions = {}
-        for name in ("Derince", "Başiskele", "Kartepe"):
-            regions[name], _ = Region.objects.get_or_create(name=name)
+        for name, code in Region.STANDARD_REGIONS:
+            region, _ = Region.objects.get_or_create(name=name, defaults={"code": code})
+            if region.code != code:
+                region.code = code
+                region.save(update_fields=["code"])
+            regions[name] = region
 
         company, _ = Company.objects.get_or_create(name="KÜRE")
 

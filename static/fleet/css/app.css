@@ -379,8 +379,9 @@ body {
   font-weight: 800;
   padding: 0.25rem 0.75rem;
   display: inline-block;
-  min-width: 110px;
+  min-width: 160px;
   text-align: center;
+  white-space: nowrap;
 }
 
 .task-date {
