@@ -177,8 +177,71 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
 <style>
-  .flatpickr-calendar { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; }
   .datetime-picker { background: #fff !important; cursor: pointer; }
+
+  /* Saat/dakika belirgin, takvim kompakt */
+  .flatpickr-calendar {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    width: 280px !important;
+  }
+  .flatpickr-months {
+    min-height: 28px;
+  }
+  .flatpickr-current-month {
+    font-size: 0.85rem !important;
+    padding-top: 0 !important;
+  }
+  .flatpickr-monthDropdown-months,
+  .numInputWrapper { font-size: 0.85rem !important; }
+  .flatpickr-weekdays { height: 22px; }
+  span.flatpickr-weekday {
+    font-size: 0.7rem;
+    max-width: none;
+  }
+  .flatpickr-days { width: 280px !important; }
+  .dayContainer {
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+  }
+  .flatpickr-day {
+    height: 28px;
+    line-height: 28px;
+    max-width: 40px;
+    font-size: 0.8rem;
+  }
+
+  .flatpickr-time {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    height: 72px !important;
+    max-height: 72px !important;
+    line-height: 72px !important;
+    border-top: 2px solid #1e4073 !important;
+    background: #f3f7fb;
+  }
+  .flatpickr-time .numInputWrapper {
+    height: 56px !important;
+    width: 64px !important;
+  }
+  .flatpickr-time input.flatpickr-hour,
+  .flatpickr-time input.flatpickr-minute {
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
+    height: 56px !important;
+    line-height: 56px !important;
+  }
+  .flatpickr-time .flatpickr-time-separator {
+    font-size: 1.75rem !important;
+    font-weight: 700;
+    line-height: 56px !important;
+    color: #1e4073;
+  }
+  .flatpickr-time .arrowUp,
+  .flatpickr-time .arrowDown {
+    height: 50% !important;
+  }
 </style>
 {% endblock %}
 
@@ -204,6 +267,19 @@
     clickOpens: true,
     locale: "tr",
     minuteIncrement: 5,
+    // Açılınca önce saat alanına odaklan
+    onReady: function (selectedDates, dateStr, instance) {
+      setTimeout(function () {
+        const hourInput = instance.timeContainer && instance.timeContainer.querySelector("input.flatpickr-hour");
+        if (hourInput) hourInput.focus();
+      }, 0);
+    },
+    onOpen: function (selectedDates, dateStr, instance) {
+      setTimeout(function () {
+        const hourInput = instance.timeContainer && instance.timeContainer.querySelector("input.flatpickr-hour");
+        if (hourInput) hourInput.focus();
+      }, 10);
+    },
   };
 
   const departurePicker = flatpickr(departureInput, {
