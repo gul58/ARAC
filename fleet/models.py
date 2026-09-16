@@ -317,6 +317,20 @@ class VehicleTask(models.Model):
     engine_hours_km = models.CharField(
         max_length=100, blank=True, verbose_name="Motor Saati / KM"
     )
+    start_km = models.DecimalField(
+        max_digits=12,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        verbose_name="İlk KM",
+    )
+    end_km = models.DecimalField(
+        max_digits=12,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        verbose_name="Son KM",
+    )
     departure_datetime = models.DateTimeField(verbose_name="Çıkış Tarihi/Saati")
     arrival_datetime = models.DateTimeField(verbose_name="Varış Tarihi/Saati")
     created_by = models.ForeignKey(
@@ -342,6 +356,66 @@ class VehicleTask(models.Model):
             return "—"
         return Region.format_task_number(self.region, self.pk)
 
+    @staticmethod
+    def work_duration(departure, arrival):
+        """
+        Çalışma süresi = giriş - çıkış.
+        Her gün 12:30–13:30 öğle aralığına denk gelirse o gün için 1 saat düşülür.
+        """
+        from datetime import datetime, time, timedelta
+
+        if not departure or not arrival or arrival <= departure:
+            return timedelta(0)
+
+        departure = timezone.localtime(departure)
+        arrival = timezone.localtime(arrival)
+        total = arrival - departure
+        lunch_start = time(12, 30)
+        lunch_end = time(13, 30)
+        lunch_len = timedelta(hours=1)
+        deduction = timedelta(0)
+
+        day = departure.date()
+        last_day = arrival.date()
+        while day <= last_day:
+            lunch_begin = timezone.make_aware(datetime.combine(day, lunch_start))
+            lunch_finish = timezone.make_aware(datetime.combine(day, lunch_end))
+            overlap_start = max(departure, lunch_begin)
+            overlap_end = min(arrival, lunch_finish)
+            if overlap_end > overlap_start:
+                deduction += lunch_len
+            day += timedelta(days=1)
+
+        result = total - deduction
+        return result if result > timedelta(0) else timedelta(0)
+
+    @property
+    def duration(self):
+        return self.work_duration(self.departure_datetime, self.arrival_datetime)
+
+    @property
+    def duration_display(self):
+        seconds = int(self.duration.total_seconds())
+        hours, rem = divmod(seconds, 3600)
+        minutes = rem // 60
+        return f"{hours}:{minutes:02d}"
+
+    @property
+    def distance_km(self):
+        if self.start_km is None or self.end_km is None:
+            return None
+        return self.end_km - self.start_km
+
+    @property
+    def distance_display(self):
+        dist = self.distance_km
+        if dist is None:
+            return "—"
+        # 12.0 -> 12 ; 12.5 -> 12.5
+        if dist == int(dist):
+            return str(int(dist))
+        return f"{dist:.1f}".rstrip("0").rstrip(".")
+
     def clean(self):
         if self.departure_datetime and self.arrival_datetime:
             if self.arrival_datetime <= self.departure_datetime:
@@ -351,6 +425,11 @@ class VehicleTask(models.Model):
                             "Varış tarihi ve saati, çıkış tarihi ve saatinden sonra olmalıdır."
                         )
                     }
+                )
+        if self.start_km is not None and self.end_km is not None:
+            if self.end_km < self.start_km:
+                raise ValidationError(
+                    {"end_km": "Son KM, İlk KM değerinden küçük olamaz."}
                 )
         if self.vehicle_id and self.driver_id:
             if self.driver.assigned_vehicle_id != self.vehicle_id:

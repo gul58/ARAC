@@ -109,8 +109,25 @@
           </td>
         </tr>
         <tr>
-          <td class="label-cell">ARACIN MOTOR SAATİ VE KM'Sİ</td>
-          <td>{{ form.engine_hours_km }}</td>
+          <td class="label-cell">ARACIN İLK / SON KM</td>
+          <td>
+            <div class="row g-2">
+              <div class="col-md-6">
+                <label class="small fw-bold" for="id_start_km">İLK KM</label>
+                {{ form.start_km }}
+                {% if form.start_km.errors %}
+                  <div class="text-danger small">{{ form.start_km.errors|striptags }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="small fw-bold" for="id_end_km">SON KM</label>
+                {{ form.end_km }}
+                {% if form.end_km.errors %}
+                  <div class="text-danger small">{{ form.end_km.errors|striptags }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </td>
         </tr>
         <tr>
           <td class="label-cell">ARACIN GİRİŞ VE ÇIKIŞ SAATİ</td>

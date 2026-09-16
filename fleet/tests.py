@@ -125,7 +125,8 @@ class AuthorizationAndTaskTests(TestCase):
                 "destination": "Şantiye",
                 "vehicle": self.vehicle_a.pk,
                 "driver": self.driver_a.pk,
-                "engine_hours_km": "100",
+                "start_km": "1000",
+                "end_km": "1100",
                 "departure_local": "10.09.2026 16:00",
                 "arrival_local": "10.09.2026 14:00",
             },
@@ -148,10 +149,21 @@ class AuthorizationAndTaskTests(TestCase):
                 "destination": "Şantiye",
                 "vehicle": self.vehicle_a.pk,
                 "driver": self.driver_a.pk,
-                "engine_hours_km": "100",
+                "start_km": "1000",
+                "end_km": "1125",
                 "departure_local": "10.09.2026 08:30",
                 "arrival_local": "10.09.2026 16:45",
             },
         )
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(VehicleTask.objects.filter(region=self.region_a).count(), 1)
+        task = VehicleTask.objects.get(region=self.region_a)
+        self.assertEqual(task.distance_display, "125")
+
+    def test_lunch_break_deducted_from_duration(self):
+        from datetime import datetime
+        from django.utils import timezone as tz
+
+        departure = tz.make_aware(datetime(2026, 9, 10, 11, 0))
+        arrival = tz.make_aware(datetime(2026, 9, 10, 15, 0))
+        duration = VehicleTask.work_duration(departure, arrival)
+        self.assertEqual(int(duration.total_seconds()), 3 * 3600)

@@ -320,7 +320,8 @@ class VehicleTaskForm(forms.ModelForm):
             "destination",
             "vehicle",
             "driver",
-            "engine_hours_km",
+            "start_km",
+            "end_km",
         ]
         widgets = {
             "assigned_supervisor_name": forms.TextInput(
@@ -343,8 +344,11 @@ class VehicleTaskForm(forms.ModelForm):
             ),
             "vehicle": forms.Select(attrs={"class": "form-select"}),
             "driver": forms.Select(attrs={"class": "form-select"}),
-            "engine_hours_km": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Motor saati / KM"}
+            "start_km": forms.NumberInput(
+                attrs={"class": "form-control", "placeholder": "İlk KM", "step": "0.1"}
+            ),
+            "end_km": forms.NumberInput(
+                attrs={"class": "form-control", "placeholder": "Son KM", "step": "0.1"}
             ),
         }
 
@@ -426,6 +430,11 @@ class VehicleTaskForm(forms.ModelForm):
         if vehicle and driver and driver.assigned_vehicle_id != vehicle.id:
             self.add_error("driver", "Seçilen şoför bu araca zimmetli değil.")
 
+        start_km = cleaned.get("start_km")
+        end_km = cleaned.get("end_km")
+        if start_km is not None and end_km is not None and end_km < start_km:
+            self.add_error("end_km", "Son KM, İlk KM değerinden küçük olamaz.")
+
         return cleaned
 
     def save(self, commit=True, created_by=None):
@@ -447,7 +456,8 @@ class VehicleTaskForm(forms.ModelForm):
 
         task.vehicle = self.cleaned_data["vehicle"]
         task.driver = self.cleaned_data["driver"]
-        task.engine_hours_km = self.cleaned_data.get("engine_hours_km") or ""
+        task.start_km = self.cleaned_data.get("start_km")
+        task.end_km = self.cleaned_data.get("end_km")
         task.departure_datetime = self.cleaned_data["departure_local"]
         task.arrival_datetime = self.cleaned_data["arrival_local"]
         task.company = task.vehicle.company
